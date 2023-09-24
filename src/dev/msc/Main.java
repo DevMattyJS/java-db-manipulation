@@ -16,7 +16,7 @@ public class Main {
         }
 
         List<Artist> artists = datasource.queryArtists(Datasource.ORDER_BY_ASC);
-        if (artists == null) {
+        if (artists.isEmpty()) {
             System.out.println("No artists!");
             return;
         }
@@ -26,7 +26,7 @@ public class Main {
         }
 
         List<String> albumsForArtist = datasource.queryAlbumsForArtist("Pink Floyd", Datasource.ORDER_BY_ASC);
-        if (albumsForArtist == null) {
+        if (albumsForArtist.isEmpty()) {
             System.out.println("No albums!");
             return;
         }
@@ -36,7 +36,7 @@ public class Main {
         }
 
         List<SongArtist> artistsForSong = datasource.queryArtistsForSong("Go Your Own Way", Datasource.ORDER_BY_ASC);
-        if(artistsForSong == null) {
+        if(artistsForSong.isEmpty()) {
             System.out.println("No artists for selected song in our DB!");
             return;
         }
@@ -50,6 +50,7 @@ public class Main {
 //        int count = datasource.getCount("songs");
 //        System.out.println("The number of songs in our database is " + count);
         datasource.createViewForSongArtists();
+
 
         artistsForSong = datasource.querySongInfoView("Go Your Own Way");
         if(artistsForSong.isEmpty()) {
