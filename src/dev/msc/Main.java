@@ -47,6 +47,21 @@ public class Main {
         }
 
 //        datasource.querySongsMetadata();
+//        int count = datasource.getCount("songs");
+//        System.out.println("The number of songs in our database is " + count);
+        datasource.createViewForSongArtists();
+
+        artistsForSong = datasource.querySongInfoView("Go Your Own Way");
+        if(artistsForSong.isEmpty()) {
+            System.out.println("Couldn't find the artist for the song");
+            return;
+        }
+
+        for (SongArtist artist : artistsForSong) {
+            System.out.println("FROM VIEW - Artist name = " + artist.getArtistName() +
+                               " Album name = " + artist.getAlbumName() +
+                               " Track number = " + artist.getTrack());
+        }
 
         datasource.close();
     }
