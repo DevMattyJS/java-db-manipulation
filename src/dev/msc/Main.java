@@ -2,6 +2,7 @@ package dev.msc;
 
 import dev.msc.model.Artist;
 import dev.msc.model.Datasource;
+import dev.msc.model.SongArtist;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class Main {
             System.out.println("ID = " + artist.getId() + ", Name = " + artist.getName());
         }
 
-        List<String> albumsForArtist = datasource.queryAlbumsForArtist("Iron Maiden", Datasource.ORDER_BY_ASC);
+        List<String> albumsForArtist = datasource.queryAlbumsForArtist("Pink Floyd", Datasource.ORDER_BY_ASC);
         if (albumsForArtist == null) {
             System.out.println("No albums!");
             return;
@@ -33,6 +34,19 @@ public class Main {
         for (String album : albumsForArtist) {
             System.out.println(album);
         }
+
+        List<SongArtist> artistsForSong = datasource.queryArtistsForSong("Go Your Own Way", Datasource.ORDER_BY_ASC);
+        if(artistsForSong == null) {
+            System.out.println("No artists for selected song in our DB!");
+            return;
+        }
+
+        for (SongArtist artist : artistsForSong) {
+            System.out.println("Artist name = " + artist.getArtistName() + " || " +
+                    "Album name = " + artist.getAlbumName() + " || " + "Track = " + artist.getTrack());
+        }
+
+//        datasource.querySongsMetadata();
 
         datasource.close();
     }

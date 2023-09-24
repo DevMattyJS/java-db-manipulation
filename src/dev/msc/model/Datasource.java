@@ -50,6 +50,22 @@ public class Datasource {
     public static final String QUERY_ALBUMS_BY_ARTIST_SORT =
             "ORDER BY " + TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + " COLLATE NOCASE ";
 
+    // SELECT artists.name, albums.name, songs.track FROM songs INNER JOIN albums ON songs.album = albums._id
+    // INNER JOIN artists ON albums.artist = artists._id WHERE songs.title = "Go Your Own Way"
+    public static final String QUERY_ARTIST_FOR_SONG_START =
+            "SELECT " + TABLE_ARTISTS + "." + COLUMN_ARTIST_NAME + ", " +
+            TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + ", " +
+            TABLE_SONGS + "." + COLUMN_SONG_TRACK + " FROM " + TABLE_SONGS +
+                    " INNER JOIN " + TABLE_ALBUMS + " ON " + TABLE_SONGS + "." + COLUMN_SONG_ALBUM + " = " + TABLE_ALBUMS + "." + COLUMN_ALBUM_ID +
+                    " INNER JOIN " + TABLE_ARTISTS + " ON " + TABLE_ALBUMS + "." + COLUMN_ALBUM_ARTIST + " = " + TABLE_ARTISTS + "." + COLUMN_ARTIST_ID +
+                    " WHERE " + TABLE_SONGS + "." + COLUMN_SONG_TITLE + " =\"";
+
+    // ORDER BY artists.name, albums.name COLLATE NOCASE ASC;
+    public static final String QUERY_ARTIST_FOR_SONG_SORT =
+            " ORDER BY " + TABLE_ARTISTS + "." + COLUMN_ARTIST_NAME + ", " +
+                    TABLE_ALBUMS + "." + COLUMN_ALBUM_NAME + " COLLATE NOCASE ";
+
+
     private Connection conn;
 
     public boolean open() {
@@ -123,9 +139,9 @@ public class Datasource {
             }
         }
 
-        System.out.println("SQL statement = " + sb.toString());
+//        System.out.println("SQL statement = " + sb.toString());
 
-        // Creates a statement and execute our SQL query, store returned ResultSet in a returns variable
+        // Creates a statement and execute our SQL query, store returned ResultSet in a results variable
         try (Statement statement = conn.createStatement();
              ResultSet results = statement.executeQuery(sb.toString())) {
 
@@ -143,4 +159,58 @@ public class Datasource {
         }
     }
 
+    public List<SongArtist> queryArtistsForSong(String songTitle, int sortOrder) {
+
+        StringBuilder sb = new StringBuilder(QUERY_ARTIST_FOR_SONG_START);
+        sb.append(songTitle);
+        sb.append("\"");
+
+        if (sortOrder != ORDER_BY_NONE) {
+            sb.append(QUERY_ARTIST_FOR_SONG_SORT);
+            if(sortOrder == ORDER_BY_DESC) {
+                sb.append("DESC");
+            } else {
+                sb.append("ASC");
+            }
+        }
+
+        System.out.println("SQL Statement = " + sb.toString());
+
+        try (Statement statement = conn.createStatement();
+             ResultSet results = statement.executeQuery(sb.toString())) {
+
+            List<SongArtist> songArtists = new ArrayList<>();
+            while (results.next()) {
+                SongArtist artist = new SongArtist();
+                artist.setArtistName(results.getString(1));
+                artist.setAlbumName(results.getString(2));
+                artist.setTrack(results.getInt(3));
+                songArtists.add(artist);
+            }
+
+            return songArtists;
+
+        } catch (SQLException e) {
+            System.out.println("Query failed: " + e.getMessage());
+            return null;
+        }
+    }
+
+    // A method to show how to get metadata (schema information)
+    public void querySongsMetadata() {
+        String sql = "SELECT * FROM " + TABLE_SONGS;
+
+        try (Statement statement = conn.createStatement();
+             ResultSet results = statement.executeQuery(sql)) {
+
+            ResultSetMetaData meta = results.getMetaData();
+            int numColumns = meta.getColumnCount();
+            for (int i = 1; i <= numColumns; i++) {
+                System.out.printf("Column %d in the songs table is named %s\n", i, meta.getColumnName(i));
+            }
+
+        } catch (SQLException e) {
+            System.out.println("Failed to load songs metadata: " + e.getMessage());
+        }
+    }
 }
